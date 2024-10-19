@@ -31,7 +31,19 @@ func NewMongoUserStore(client *mongo.Client, ) *MongoUserStore {
 }
 
 func ConnectMongo() (*mongo.Client, error) {
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb://localhost:27017/hotel"))
+	credential := options.Credential{
+		Username: config.AppConfig.DatabaseUser,
+		Password: config.AppConfig.DatabasePassword,
+	}
+	connString := fmt.Sprintf(
+		"mongodb://%v:%v/%v",
+		config.AppConfig.DatabaseHost,
+		config.AppConfig.DatabasePort,
+		config.AppConfig.DatabaseName,
+	)
+	fmt.Println(connString)
+	clientOptions := options.Client().ApplyURI(connString).SetAuth(credential)
+	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		return nil, err
 	}
